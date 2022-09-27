@@ -15,6 +15,7 @@ class CreateSpeciesTable extends Migration
     {
         Schema::create('species', function (Blueprint $table) {
             $table->id();
+            $table->string('species_id');
             $table->string('scientific_name');
             $table->string('local_name')->nullable();
             $table->string('a')->nullable();

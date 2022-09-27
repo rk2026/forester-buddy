@@ -1,20 +1,11 @@
 <template>
     <v-app>
-        <v-app-bar color="green" app>
+        <v-app-bar app>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-toolbar-title>Forester Buddy</v-toolbar-title>
         </v-app-bar>
-        <v-navigation-drawer :mini-variant="drawer" app color="green">
-            <v-list-item>
-                <v-list-item-content>
-                    <v-list-item-title class="text-h6">
-                        Forester Buddy
-                    </v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
-            <v-divider></v-divider>
+        <v-navigation-drawer dark :mini-variant="drawer" app color="green">
             <v-list
-                dense
                 nav
             >
                 <v-list-item
@@ -26,7 +17,6 @@
                     <v-list-item-icon>
                         <v-icon>{{ item.icon }}</v-icon>
                     </v-list-item-icon>
-
                     <v-list-item-content>
                         <v-list-item-title>{{ item.title }}</v-list-item-title>
                     </v-list-item-content>

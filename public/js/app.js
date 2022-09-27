@@ -1942,16 +1942,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'App',
   components: {},
@@ -2005,6 +1995,8 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 //
 //
 //
@@ -2034,48 +2026,89 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "VCalc",
   data: function data() {
     return {
+      species: [],
       csvFile: null,
       csvData: [],
       headers: [{
-        text: 'SN',
-        value: 'sn'
+        text: 'Chapan No.',
+        value: 'chapan_no'
       }, {
-        text: 'Scientific Name',
+        text: 'Species Code',
+        value: 'species_id'
+      }, {
+        text: 'Species (Scientific Name)',
         value: 'scientific_name'
       }, {
-        text: 'Local Name',
+        text: 'Species (Local Name)',
         value: 'local_name'
       }, {
-        text: 'a',
-        value: 'a'
+        text: 'Latitude',
+        value: 'latitude'
       }, {
-        text: 'b',
-        value: 'b'
+        text: 'Longitude',
+        value: 'longitude'
       }, {
-        text: 'c',
-        value: 'c'
+        text: 'Girth(cm)',
+        value: 'girth_cm'
       }, {
-        text: 'a1',
-        value: 'a1'
+        text: 'Height(m)',
+        value: 'height_m'
       }, {
-        text: 'b1',
-        value: 'b1'
+        text: 'Class',
+        value: 'class'
       }, {
-        text: 's',
-        value: 's'
+        text: 'Remarks',
+        value: 'remarks'
       }, {
-        text: 'm',
-        value: 'm'
+        text: 'Tree Count',
+        value: 'tree_count'
       }, {
-        text: 'bg',
-        value: 'bg'
+        text: 'Stem Volume (m3)',
+        value: 'stem_volume'
       }, {
-        text: 'dbh',
-        value: 'dbh'
+        text: 'Branch Ratio',
+        value: 'branch_ratio'
+      }, {
+        text: 'Branch Volume(m3)',
+        value: 'branch_volume'
+      }, {
+        text: 'Tree Volume(m3)',
+        value: 'tree_volume'
+      }, {
+        text: '10 cm Top Dia. Ratio',
+        value: 'top_dia_ratio'
+      }, {
+        text: '10 cm Top Volume (m3)',
+        value: 'top_volume'
+      }, {
+        text: 'Gross Timber Volume (m3)',
+        value: 'gross_timber_volume'
+      }, {
+        text: 'Net Volume (m3)',
+        value: 'net_volume_m3'
+      }, {
+        text: 'Net Volume (cft)',
+        value: 'net_volume_cft'
+      }, {
+        text: 'Firewood (m3)',
+        value: 'firewood'
+      }, {
+        text: 'Count of Chatta',
+        value: 'chatta_count'
+      }, {
+        text: 'Dia. Class',
+        value: 'dia_class'
+      }, {
+        text: 'Dia. From',
+        value: 'dia_from'
+      }, {
+        text: 'Dia. To',
+        value: 'dia_to'
       }]
     };
   },
@@ -2084,10 +2117,11 @@ __webpack_require__.r(__webpack_exports__);
       var temp = this;
 
       if (this.csvFile) {
-        var data = this.$papa.parse(this.csvFile, {
+        this.$papa.parse(this.csvFile, {
           header: true,
           complete: function complete(results) {
             temp.csvData = results.data;
+            temp.calculateValues();
           }
         });
       }
@@ -2095,7 +2129,40 @@ __webpack_require__.r(__webpack_exports__);
     downloadCalculatedCSV: function downloadCalculatedCSV() {
       var temp = this;
       this.$papa.download(this.$papa.unparse(temp.csvData), "Calculated CSV");
+    },
+    calculateValues: function calculateValues() {
+      var temp = this;
+      temp.csvData.forEach(function (item) {
+        var species = temp.species.find(function (species) {
+          return parseInt(species.species_id) === parseInt(item.species_id);
+        });
+        item.scientific_name = species.scientific_name;
+        item.local_name = species.local_name;
+        item.tree_count = 1;
+        var dbh = parseFloat(item.girth_cm) / Math.PI;
+        item.stem_volume = Math.exp(parseFloat(species.a) + parseFloat(species.b) * Math.log(dbh) + parseFloat(species.c) * Math.log(parseFloat(item.height_m))) / 1000;
+        /*item.branch_ratio=item.branch_ratio.trim();
+        item.branch_volume=item.branch_volume.trim();
+        item.tree_volume=item.tree_volume.trim();
+        item.top_dia_ratio=item.top_dia_ratio.trim();
+        item.top_volume=item.top_volume.trim();
+        item.gross_timber_volume=item.gross_timber_volume.trim();
+        item.net_volume_m3=item.net_volume_m3.trim();
+        item.net_volume_cft=item.net_volume_cft.trim();
+        item.firewood=item.firewood.trim();
+        item.chatta_count=item.chatta_count.trim();
+        item.dia_class=item.dia_class.trim();
+        item.dia_from=item.dia_from.trim();
+        item.dia_to=item.dia_to.trim();*/
+      });
     }
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('/api/species').then(function (response) {
+      _this.species = response.data.data;
+    });
   }
 });
 
@@ -19774,7 +19841,7 @@ var render = function() {
     [
       _c(
         "v-app-bar",
-        { attrs: { color: "green", app: "" } },
+        { attrs: { app: "" } },
         [
           _c("v-app-bar-nav-icon", {
             on: {
@@ -19791,31 +19858,18 @@ var render = function() {
       _vm._v(" "),
       _c(
         "v-navigation-drawer",
-        { attrs: { "mini-variant": _vm.drawer, app: "", color: "green" } },
+        {
+          attrs: {
+            dark: "",
+            "mini-variant": _vm.drawer,
+            app: "",
+            color: "green"
+          }
+        },
         [
           _c(
-            "v-list-item",
-            [
-              _c(
-                "v-list-item-content",
-                [
-                  _c("v-list-item-title", { staticClass: "text-h6" }, [
-                    _vm._v(
-                      "\n                    Forester Buddy\n                "
-                    )
-                  ])
-                ],
-                1
-              )
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c("v-divider"),
-          _vm._v(" "),
-          _c(
             "v-list",
-            { attrs: { dense: "", nav: "" } },
+            { attrs: { nav: "" } },
             _vm._l(_vm.items, function(item) {
               return _c(
                 "v-list-item",
