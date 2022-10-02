@@ -60,9 +60,6 @@ export default {
                 {text: 'Net Volume (cft)', value: 'net_volume_cft'},
                 {text: 'Firewood (m3)', value: 'firewood'},
                 {text: 'Count of Chatta', value: 'chatta_count'},
-                {text: 'Dia. Class', value: 'dia_class'},
-                {text: 'Dia. From', value: 'dia_from'},
-                {text: 'Dia. To', value: 'dia_to'},
             ]
         }
     },
@@ -81,7 +78,8 @@ export default {
         },
         downloadCalculatedCSV() {
             var temp = this;
-            this.$papa.download(this.$papa.unparse(temp.csvData), "Calculated CSV")
+            this.$papa.download(this.$papa.unparse(temp.csvData), "Calculated CSV");
+            temp.saveToDatabase();
         },
         calculateValues() {
             var temp = this;
@@ -89,24 +87,49 @@ export default {
                 let species = temp.species.find(function (species) {
                     return parseInt(species.species_id) === parseInt(item.species_id);
                 });
-                item.scientific_name = species.scientific_name;
-                item.local_name = species.local_name;
+                item.scientific_name = species.scientific_name? species.scientific_name : '';
+                item.local_name = species.local_name? species.local_name : '';
                 item.tree_count = 1;
                 let dbh = parseFloat(item.girth_cm) / Math.PI;
                 item.stem_volume = (Math.exp(parseFloat(species.a) + parseFloat(species.b) * Math.log(dbh)+parseFloat(species.c)*Math.log(parseFloat(item.height_m))))/1000;
-                /*item.branch_ratio=item.branch_ratio.trim();
-                item.branch_volume=item.branch_volume.trim();
-                item.tree_volume=item.tree_volume.trim();
-                item.top_dia_ratio=item.top_dia_ratio.trim();
-                item.top_volume=item.top_volume.trim();
-                item.gross_timber_volume=item.gross_timber_volume.trim();
-                item.net_volume_m3=item.net_volume_m3.trim();
-                item.net_volume_cft=item.net_volume_cft.trim();
-                item.firewood=item.firewood.trim();
-                item.chatta_count=item.chatta_count.trim();
-                item.dia_class=item.dia_class.trim();
-                item.dia_from=item.dia_from.trim();
-                item.dia_to=item.dia_to.trim();*/
+                if(dbh<10){
+                    item.branch_ratio = parseFloat(species.s);
+                }else if(dbh>=10 && dbh<40){
+                    item.branch_ratio = ((dbh-10)*parseFloat(species.m)+(40-dbh)*parseFloat(species.s))/30;
+                }else if(dbh>=40 && dbh<70) {
+                    item.branch_ratio = ((dbh - 40) * parseFloat(species.bg) + (70 - dbh) * parseFloat(species.m)) / 30;
+                }else if(dbh>=70){
+                    item.branch_ratio = parseFloat(species.bg);
+                }
+                item.branch_volume=item.stem_volume* item.branch_ratio;
+                item.tree_volume=item.stem_volume+item.branch_volume;
+                item.top_dia_ratio=Math.exp(parseFloat(species.a1)+parseFloat(species.b1)*Math.log(dbh));
+                item.top_volume=item.stem_volume*item.top_dia_ratio;
+                item.gross_timber_volume=item.stem_volume-item.top_volume;
+                if(item.class==="1") {
+                    item.net_volume_m3 = item.gross_timber_volume * 0.8;
+                }else if(item.class==="2"){
+                    item.net_volume_m3 = item.gross_timber_volume * 0.6;
+                }else if(item.class==="3") {
+                    item.net_volume_m3 = item.gross_timber_volume * 0.3;
+                }else if(item.class==="4") {
+                    item.net_volume_m3 = 0;
+                }
+
+                item.net_volume_cft=item.net_volume_m3*35.31466688252347;
+                item.firewood=item.tree_volume-item.net_volume_m3;
+                item.chatta_count=item.firewood*(105.94/1000);
+            });
+        },
+        saveToDatabase() {
+            axios.post('/api/add-trees-data',{
+                trees: this.csvData
+            }).then(function (response) {
+                if(response.status===200){
+                    console.log(response.message);
+                }
+            }).catch(function (error) {
+                console.log(error);
             });
         }
     },

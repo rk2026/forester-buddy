@@ -24,7 +24,7 @@ class CreateTreesTable extends Migration
             $table->string('girth_cm');
             $table->string('height_m');
             $table->string('class');
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }

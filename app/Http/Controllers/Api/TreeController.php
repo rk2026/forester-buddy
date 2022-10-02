@@ -25,20 +25,22 @@ class TreeController extends Controller
 
     public function addTree(Request $request)
     {
-        foreach ($request as $data) {
+        $upload_id='file_' . date('m-d-Y_hia');
+        foreach ($request->trees as $data) {
             $tree = new Tree();
             $tree->user_id = 1;
-            $tree->species_id = $data->species_id;
-            $tree->upload_id = 'file_' . date('m-d-Y_hia');
-            $tree->chapan_no = $data->chapan_no;
-            $tree->latitude = $data->latitude;
-            $tree->longitude = $data->longitude;
-            $tree->girth_cm = $data->girth_cm;
-            $tree->height_m = $data->height_m;
-            $tree->class = $data->class;
+            $tree->species_id = $data["species_id"];
+            $tree->upload_id =$upload_id;
+            $tree->chapan_no = $data["chapan_no"];
+            $tree->latitude = $data["latitude"];
+            $tree->longitude = $data["longitude"];
+            $tree->girth_cm = $data["girth_cm"];
+            $tree->height_m = $data["height_m"];
+            $tree->class = $data["class"];
+            $tree->remarks = $data["remarks"];
             $tree->save();
         }
 
-        return response()->json(["message" => "File uploaded successfully"]);
+        return response()->json(["message" => "Data uploaded successfully."]);
     }
 }
